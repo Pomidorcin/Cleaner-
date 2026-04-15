@@ -1,22 +1,47 @@
 @echo off
+set "titleName=CLEANER - made by Pomidorckin"
+
+:: 1. Проверка прав админа
 chcp 65001 >nul
-title CLEANER - made by Pomidorckin
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [!] ЗАПУСТИТЕ ОТ ИМЕНИ АДМИНИСТРАТОРА!
+    pause
+    exit
+)
+
+:: 2. Хак для шрифта
+reg add "HKCU\Console\%titleName%" /v "FaceName" /t REG_SZ /d "Consolas" /f >nul
+reg add "HKCU\Console\%titleName%" /v "FontSize" /t REG_DWORD /d 0x00120000 /f >nul
+
+if "%~1" neq "restarted" (
+    start "CLEANER - made by Pomidorckin" cmd /c "%~f0" restarted
+    exit
+)
+
+:: --- ОСНОВНОЙ КОД ---
+chcp 65001 >nul
+title %titleName%
 mode con: cols=115 lines=48
 color 0F
 
-set "c1=C:\Celestial\Beta 1.16.5\baritone"
-set "c2=C:\DeltaClient\game\baritone"
-set "c3=C:\Sk3dGuardNew\clients\Britva\versions\yxBhhIOyIQ\baritone"
-set "c4=C:\Sk3dGuardNew\clients\Britva\versions\J0SKKUIBaM\baritone"
-set "c5=C:\Nursultan\1.16.5\baritone"
-set "c6=C:\Expensive\game\baritone"
-set "c7=C:\Velka\baritone"
+:: Пути Baritone
+set "b1=C:\Celestial\Beta 1.16.5\baritone"
+set "b2=C:\DeltaClient\game\baritone"
+set "b3=C:\Sk3dGuardNew\clients\Britva\versions\yxBhhIOyIQ\baritone"
+set "b4=C:\Sk3dGuardNew\clients\Britva\versions\J0SKKUIBaM\baritone"
+set "b5=C:\Nursultan\1.16.5\baritone"
+set "b6=C:\Expensive\game\baritone"
+set "b7=C:\Velka\baritone"
 
-set "r_year=2026"
-set "r_m_min=3"
-set "r_m_max=3"
-set "r_d_min=1"
-set "r_d_max=14"
+:: Пути Logs
+set "l1=C:\Celestial\Beta 1.16.5\logs"
+set "l2=C:\DeltaClient\game\logs"
+set "l3=C:\Sk3dGuardNew\clients\Britva\versions\yxBhhIOyIQ\logs"
+set "l4=C:\Sk3dGuardNew\clients\Britva\versions\J0SKKUIBaM\logs"
+set "l5=C:\Nursultan\1.16.5\logs"
+set "l6=C:\Expensive\game\logs"
+set "l7=C:\Velka\logs"
 
 :client_select
 cls
@@ -30,91 +55,79 @@ powershell -Command "Write-Host '     ╚═════╝╚══════
 echo                      made by Pomidorckin
 powershell -Command "Write-Host '                      ds: pomidorckin00 ' -ForegroundColor Blue"
 echo.
-powershell -Command "Write-Host '  [!] ВНИМАНИЕ: Софт не скрывает запущенный чит, а удаляет все улики игры на фантайме для прохода проверки.' -ForegroundColor Red"
-powershell -Command "Write-Host '  [!] Используйте для подготовки или быстрого сейва друга на проверке! ' -ForegroundColor Red"
-echo.
 echo    =================================================================================
-echo    1. Celestial (Beta 1.16.5)    3. Britva Beta    5. Nursultan
-echo    2. Delta Client               4. Britva Main    6. Expensive
+echo    1. Celestial (Beta)           3. Britva (yxB)           5. Nursultan
+echo    2. Delta Client               4. Britva (J0S)           6. Expensive
 echo    7. Velka
 echo    ---------------------------------------------------------------------------------
-echo    [A] ВЫБРАТЬ ВСЕ КЛИЕНТЫ СРАЗУ (1-7) - ПО УМОЛЧАНИЮ
-echo    [C] Ввести путь вручную
-echo    [D] НАСТРОИТЬ ДИАПАЗОН ДАТЫ
+echo    [A] ВЫБРАТЬ ВСЕ КЛИЕНТЫ СРАЗУ (1-7)
+echo    [C] Ввести пути ВРУЧНУЮ (Baritone + Logs)
+echo    [R] Восстановить время (Sync)
 powershell -Command "Write-Host '   [N] Выход' -ForegroundColor Red"
 echo    =================================================================================
-set "client_choice=A"
-set /p "client_choice=   Выбор >> "
+set "choice=A"
+set /p "choice=   Выбор >> "
 
-set "m_f=0"
-if /i "%client_choice%"=="D" goto setup_date
-if /i "%client_choice%"=="В" goto setup_date
-if /i "%client_choice%"=="A" goto all_clients_mode
-if /i "%client_choice%"=="Ф" goto all_clients_mode
-if /i "%client_choice%"=="C" goto manual_path
-if /i "%client_choice%"=="С" goto manual_path
-if /i "%client_choice%"=="N" exit
-if /i "%client_choice%"=="Т" exit
+if /i "%choice%"=="N" exit
+if /i "%choice%"=="R" goto sync_time
+if /i "%choice%"=="C" goto manual_input
 
-set "targetDir="
-if "%client_choice%"=="1" set "targetDir=%c1%"
-if "%client_choice%"=="2" set "targetDir=%c2%"
-if "%client_choice%"=="3" set "targetDir=%c3%"
-if "%client_choice%"=="4" set "targetDir=%c4%"
-if "%client_choice%"=="5" set "targetDir=%c5%"
-if "%client_choice%"=="6" set "targetDir=%c6%"
-if "%client_choice%"=="7" set "targetDir=%c7%"
-if not defined targetDir set "targetDir=%c1%"
-set "multiPath='%targetDir%'"
-goto mode_select
+set "selB="
+set "selL="
 
-:setup_date
+if /i "%choice%"=="A" (
+    set "selB='%b1%','%b2%','%b3%','%b4%','%b5%','%b6%','%b7%'"
+    set "selL='%l1%','%l2%','%l3%','%l4%','%l5%','%l6%','%l7%'"
+) else (
+    if "%choice%"=="1" set "selB='%b1%'" & set "selL='%l1%'"
+    if "%choice%"=="2" set "selB='%b2%'" & set "selL='%l2%'"
+    if "%choice%"=="3" set "selB='%b3%'" & set "selL='%l3%'"
+    if "%choice%"=="4" set "selB='%b4%'" & set "selL='%l4%'"
+    if "%choice%"=="5" set "selB='%b5%'" & set "selL='%l5%'"
+    if "%choice%"=="6" set "selB='%b6%'" & set "selL='%l6%'"
+    if "%choice%"=="7" set "selB='%b7%'" & set "selL='%l7%'"
+)
+
+if not defined selB goto client_select
+goto process
+
+:manual_input
 cls
 echo.
-echo    НАСТРОЙКА РАНДОМА ДАТЫ:
+echo    НАСТРОЙКА КАСТОМНЫХ ПУТЕЙ:
 echo    ---------------------------------------------------------------------------------
-set /p "r_year=   Год: "
-set /p "r_m_min=   Месяц ОТ 1-12: "
-set /p "r_m_max=   Месяц ДО 1-12: "
-set /p "r_d_min=   День ОТ 1-31: "
-set /p "r_d_max=   День ДО 1-31: "
-goto client_select
+set /p "uB=   1. Введите путь к Baritone: "
+set /p "uL=   2. Введите путь к Logs: "
+set "selB='%uB%'"
+set "selL='%uL%'"
+goto process
 
-:manual_path
-echo.
-set /p "targetDir=   Путь: "
-set "multiPath='%targetDir%'"
-set "m_f=1"
-goto mode_select
-
-:all_clients_mode
-set "multiPath='%c1%','%c2%','%c3%','%c4%','%c5%','%c6%','%c7%'"
-set "targetDir=ВСЕ КЛИЕНТЫ (1-7)"
-goto mode_select
-
-:mode_select
+:process
 cls
 echo.
-echo    ВЫБРАНО: %targetDir%
-echo    ТЕКУЩИЙ РАНДОМ: %r_m_min%-%r_m_max% месяц, %r_d_min%-%r_d_max% день, %r_year% год.
+echo    ЗАПУСК ОБРАБОТКИ...
 echo    ---------------------------------------------------------------------------------
-echo    1. ПОМЕНЯТЬ ДАТУ ИЗМЕНЕНИЯ - ПО УМОЛЧАНИЮ
-echo    2. УДАЛИТЬ ПАПКИ СЕРВЕРОВ
-powershell -Command "Write-Host '   [B] Назад' -ForegroundColor Gray"
-echo    ---------------------------------------------------------------------------------
-set "mode_choice=1"
-set /p "mode_choice=   Режим >> "
+echo    [!] Смена системного времени на 2026...
+net stop w32time >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" /v Type /t REG_SZ /d NoSync /f >nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$dt=Get-Date -Year 2026 -Month (Get-Random -Min 1 -Max 4) -Day (Get-Random -Min 1 -Max 28) -Hour (Get-Random -Min 10 -Max 20); Set-Date $dt"
+timeout /t 1 >nul
 
-if /i "%mode_choice%"=="B" goto client_select
-if /i "%mode_choice%"=="И" goto client_select
+echo    [!] Обработка BARITONE:
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$paths=@(%selB%); $names=@('play.funtime.su','play2.funtime.su','mc.funtime.su','test-tcp.funtime.sh','test-neo.funtime.sh','tcpshield.funtime.me','neoprotect.funtime.me','neoprotect.funtime.su','tcpshield.funtime.su','tcpshield-ovh.funtime.su','tcp.funtime.sh','neo.funtime.sh','funtime.su','connect.funtime.su','tt.funtime.su','play.expensive.su'); foreach ($p in $paths) { if (Test-Path $p) { $found = Get-ChildItem -Path $p -Directory; foreach ($dir in $found) { if ($names -contains $dir.Name -or $dir.Name -like '*funtime*' -or $dir.Name -like '*expensive*') { $dt = Get-Date -Year 2026 -Month (Get-Random -Min 1 -Max 4) -Day (Get-Random -Min 1 -Max 28) -Hour (Get-Random -Min 9 -Max 21) -Minute (Get-Random -Min 0 -Max 59); try { (Get-Item $dir.FullName).LastWriteTime = $dt; (Get-Item $dir.FullName).CreationTime = $dt.AddMinutes(-10); Get-ChildItem $dir.FullName -Recurse | ForEach-Object { try { $_.LastWriteTime = $dt; $_.CreationTime = $dt } catch {} }; Write-Host ('  [+] ' + $dir.Name.PadRight(25) + ' [OK]') -ForegroundColor Green } catch {} } } } }"
 
-set "act=date"
-if "%mode_choice%"=="2" set "act=delete"
-
-cls
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$paths=@(%multiPath%); $names=@('play.funtime.su','play2.funtime.su','mc.funtime.su','test-tcp.funtime.sh','test-neo.funtime.sh','tcpshield.funtime.me','neoprotect.funtime.me','neoprotect.funtime.su','tcpshield.funtime.su','tcpshield-ovh.funtime.su','tcp.funtime.sh','neo.funtime.sh','funtime.su','connect.funtime.su','tt.funtime.su','play.expensive.su'); foreach ($p in $paths) { Write-Host ('-- ' + $p) -ForegroundColor Gray; if (Test-Path $p) { foreach ($n in ($names | Select-Object -Unique)) { $bp = Join-Path $p $n; if (Test-Path $bp) { try { if ('%act%' -eq 'date') { $m=Get-Random -Min %r_m_min% -Max (%r_m_max%+1); $day=Get-Random -Min %r_d_min% -Max (%r_d_max%+1); $h=Get-Random -Min 9 -Max 21; $min=Get-Random -Min 10 -Max 59; $dt = Get-Date -Year %r_year% -Month $m -Day $day -Hour $h -Minute $min -Second 0; (Get-Item $bp).LastWriteTime = $dt; (Get-Item $bp).CreationTime = $dt.AddMinutes(-10); Get-ChildItem $bp -Recurse | ForEach-Object { $_.LastWriteTime = $dt; $_.CreationTime = $dt }; Write-Host ' [  OK  ] ' -NoNewline -BackgroundColor Green -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' ' + $dt.ToString('dd.MM.yyyy')) } else { Remove-Item $bp -Recurse -Force; Write-Host ' [ УДАЛЕНО ] ' -NoNewline -BackgroundColor Cyan -ForegroundColor White; Write-Host (' ' + $n.PadRight(30)) } } catch { Write-Host ' [ ОШИБКА ] ' -NoNewline -BackgroundColor Red -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' (LOCKED! ЗАКРОЙТЕ ПРОВОДНИК!)') -ForegroundColor Red } } } } else { Write-Host '    [!] ПУТЬ КЛИЕНТА НЕ НАЙДЕН НА ЭТОМ ПК' -ForegroundColor DarkGray } }"
-powershell -Command "Clear-History; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory() -ErrorAction SilentlyContinue" >nul 2>&1
 echo.
-echo   Операция завершена. Нажмите любую клавишу...
-pause >nul
+echo    [!] Очистка LOGS (список удаленных файлов):
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$paths=@(%selL%); foreach ($p in $paths) { if (Test-Path $p) { Write-Host (' >> ' + $p) -ForegroundColor Gray; $files = Get-ChildItem -Path $p -File -Recurse; foreach ($f in $files) { try { Remove-Item $f.FullName -Force; Write-Host ('  [-] ' + $f.Name) -ForegroundColor Cyan } catch {} } } }"
+
+:sync_time
+echo.
+echo    [!] Синхронизация времени...
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" /v Type /t REG_SZ /d NTP /f >nul
+net start w32time >nul 2>&1
+w32tm /resync /force >nul 2>&1
+
+echo.
+echo    ГОТОВО.
+pause
 goto client_select
