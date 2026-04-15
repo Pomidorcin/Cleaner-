@@ -1,3 +1,7 @@
+# Установка кодировки UTF8 для кириллицы
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 # Установка кодировки для корректного отображения кириллицы
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
