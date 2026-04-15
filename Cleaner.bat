@@ -13,10 +13,10 @@ set "c6=C:\Expensive\game\baritone"
 set "c7=C:\Velka\baritone"
 
 set "r_year=2026"
-set "r_m_min=1"
+set "r_m_min=3"
 set "r_m_max=3"
 set "r_d_min=1"
-set "r_d_max=29"
+set "r_d_max=14"
 
 :client_select
 cls
