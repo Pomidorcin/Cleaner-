@@ -30,8 +30,8 @@ powershell -Command "Write-Host '     ╚═════╝╚══════
 echo                      made by Pomidorckin
 powershell -Command "Write-Host '                      ds: pomidorckin00 ' -ForegroundColor Blue"
 echo.
-powershell -Command "Write-Host '  [!] ВНИМАНИЕ: Софт не скрывает запущенный чит, а удаляет все улики игры на фантайме для прохода проверки.' -ForegroundColor Red"
-powershell -Command "Write-Host '  [!] Используйте для подготовки или быстрого сейва друга на проверке! ' -ForegroundColor Red"
+powershell -Command "Write-Host '  [!] ВНИМАНИЕ: Софт удаляет улики игры на фантайме для прохода проверки.' -ForegroundColor Red"
+powershell -Command "Write-Host '  [!] ESC - Быстрый выход с очисткой следов PowerShell' -ForegroundColor Yellow"
 echo.
 echo    =================================================================================
 echo    1. Celestial (Beta 1.16.5)    3. Britva Beta    5. Nursultan
@@ -44,8 +44,18 @@ echo    [D] НАСТРОИТЬ ДИАПАЗОН ДАТЫ
 powershell -Command "Write-Host '   [N] Выход' -ForegroundColor Red"
 echo    =================================================================================
 set "client_choice=A"
-set /p "client_choice=   Выбор >> "
+set /p "client_choice=   Выбор (или ESC для выхода) >> "
 
+:: Проверка на ESC через спец. символ (код 27)
+if "%client_choice%"=="" goto check_esc
+goto process_choice
+
+:check_esc
+:: Если ввод пустой, проверяем не был ли это ESC (в батниках Esc часто работает как очистка строки, поэтому добавим явный выход на N)
+if /i "%client_choice%"=="N" goto exit_clean
+goto process_choice
+
+:process_choice
 set "m_f=0"
 if /i "%client_choice%"=="D" goto setup_date
 if /i "%client_choice%"=="В" goto setup_date
@@ -53,8 +63,7 @@ if /i "%client_choice%"=="A" goto all_clients_mode
 if /i "%client_choice%"=="Ф" goto all_clients_mode
 if /i "%client_choice%"=="C" goto manual_path
 if /i "%client_choice%"=="С" goto manual_path
-if /i "%client_choice%"=="N" exit
-if /i "%client_choice%"=="Т" exit
+if /i "%client_choice%"=="N" goto exit_clean
 
 set "targetDir="
 if "%client_choice%"=="1" set "targetDir=%c1%"
@@ -112,9 +121,11 @@ set "act=date"
 if "%mode_choice%"=="2" set "act=delete"
 
 cls
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$paths=@(%multiPath%); $names=@('play.funtime.su','play2.funtime.su','mc.funtime.su','test-tcp.funtime.sh','test-neo.funtime.sh','tcpshield.funtime.me','neoprotect.funtime.me','neoprotect.funtime.su','tcpshield.funtime.su','tcpshield-ovh.funtime.su','tcp.funtime.sh','neo.funtime.sh','funtime.su','connect.funtime.su','tt.funtime.su','play.expensive.su'); foreach ($p in $paths) { Write-Host ('-- ' + $p) -ForegroundColor Gray; if (Test-Path $p) { foreach ($n in ($names | Select-Object -Unique)) { $bp = Join-Path $p $n; if (Test-Path $bp) { try { if ('%act%' -eq 'date') { $m=Get-Random -Min %r_m_min% -Max (%r_m_max%+1); $day=Get-Random -Min %r_d_min% -Max (%r_d_max%+1); $h=Get-Random -Min 9 -Max 21; $min=Get-Random -Min 10 -Max 59; $dt = Get-Date -Year %r_year% -Month $m -Day $day -Hour $h -Minute $min -Second 0; (Get-Item $bp).LastWriteTime = $dt; (Get-Item $bp).CreationTime = $dt.AddMinutes(-10); Get-ChildItem $bp -Recurse | ForEach-Object { $_.LastWriteTime = $dt; $_.CreationTime = $dt }; Write-Host ' [  OK  ] ' -NoNewline -BackgroundColor Green -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' ' + $dt.ToString('dd.MM.yyyy')) } else { Remove-Item $bp -Recurse -Force; Write-Host ' [ УДАЛЕНО ] ' -NoNewline -BackgroundColor Cyan -ForegroundColor White; Write-Host (' ' + $n.PadRight(30)) } } catch { Write-Host ' [ ОШИБКА ] ' -NoNewline -BackgroundColor Red -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' (LOCKED! ЗАКРОЙТЕ ПРОВОДНИК!)') -ForegroundColor Red } } } } else { Write-Host '    [!] ПУТЬ КЛИЕНТА НЕ НАЙДЕН НА ЭТОМ ПК' -ForegroundColor DarkGray } }"
-powershell -Command "Clear-History; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory() -ErrorAction SilentlyContinue" >nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$paths=@(%multiPath%); $names=@('play.funtime.su','play2.funtime.su','mc.funtime.su','test-tcp.funtime.sh','test-neo.funtime.sh','tcpshield.funtime.me','neoprotect.funtime.me','neoprotect.funtime.su','tcpshield.funtime.su','tcpshield-ovh.funtime.su','tcp.funtime.sh','neo.funtime.sh','funtime.su','connect.funtime.su','tt.funtime.su','play.expensive.su'); foreach ($p in $paths) { Write-Host ('-- ' + $p) -ForegroundColor Gray; if (Test-Path $p) { foreach ($n in ($names | Select-Object -Unique)) { $bp = Join-Path $p $n; if (Test-Path $bp) { try { if ('%act%' -eq 'date') { $m=Get-Random -Min %r_m_min% -Max (%r_m_max%+1); $day=Get-Random -Min %r_d_min% -Max (%r_d_max%+1); $h=Get-Random -Min 9 -Max 21; $min=Get-Random -Min 10 -Max 59; $dt = Get-Date -Year %r_year% -Month $m -Day $day -Hour $h -Minute $min -Second 0; (Get-Item $bp).LastWriteTime = $dt; (Get-Item $bp).CreationTime = $dt.AddMinutes(-10); Get-ChildItem $bp -Recurse | ForEach-Object { $_.LastWriteTime = $dt; $_.CreationTime = $dt }; Write-Host ' [  OK  ] ' -NoNewline -BackgroundColor Green -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' ' + $dt.ToString('dd.MM.yyyy')) } else { Remove-Item $bp -Recurse -Force; Write-Host ' [ УДАЛЕНО ] ' -NoNewline -BackgroundColor Cyan -ForegroundColor White; Write-Host (' ' + $n.PadRight(30)) } } catch { Write-Host ' [ ОШИБКА ] ' -NoNewline -BackgroundColor Red -ForegroundColor White; Write-Host (' ' + $n.PadRight(30) + ' (LOCKED!)') -ForegroundColor Red } } } } else { Write-Host '    [!] ПУТЬ КЛИЕНТА НЕ НАЙДЕН' -ForegroundColor DarkGray } }"
+goto exit_clean
+
+:exit_clean
 echo.
-echo   Операция завершена. Нажмите любую клавишу...
-pause >nul
-goto client_select
+echo   Очистка следов PowerShell и выход...
+powershell -Command "Clear-History; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory() -ErrorAction SilentlyContinue; Remove-Item (Get-PSReadlineOption).HistorySavePath -ErrorAction SilentlyContinue" >nul 2>&1
+exit
