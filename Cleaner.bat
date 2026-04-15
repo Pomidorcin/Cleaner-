@@ -10,6 +10,7 @@ set "c3=C:\Sk3dGuardNew\clients\Britva\versions\yxBhhIOyIQ\baritone"
 set "c4=C:\Sk3dGuardNew\clients\Britva\versions\J0SKKUIBaM\baritone"
 set "c5=C:\Nursultan\1.16.5\baritone"
 set "c6=C:\Expensive\game\baritone"
+set "c7=C:\Velka\baritone"
 
 set "r_year=2026"
 set "r_m_min=3"
@@ -35,8 +36,9 @@ echo.
 echo    =================================================================================
 echo    1. Celestial (Beta 1.16.5)    3. Britva Beta    5. Nursultan
 echo    2. Delta Client               4. Britva Main    6. Expensive
+echo    7. Velka
 echo    ---------------------------------------------------------------------------------
-echo    [A] ВЫБРАТЬ ВСЕ КЛИЕНТЫ СРАЗУ (1-6) - ПО УМОЛЧАНИЮ
+echo    [A] ВЫБРАТЬ ВСЕ КЛИЕНТЫ СРАЗУ (1-7) - ПО УМОЛЧАНИЮ
 echo    [C] Ввести путь вручную
 echo    [D] НАСТРОИТЬ ДИАПАЗОН ДАТЫ
 powershell -Command "Write-Host '   [N] Выход' -ForegroundColor Red"
@@ -61,6 +63,7 @@ if "%client_choice%"=="3" set "targetDir=%c3%"
 if "%client_choice%"=="4" set "targetDir=%c4%"
 if "%client_choice%"=="5" set "targetDir=%c5%"
 if "%client_choice%"=="6" set "targetDir=%c6%"
+if "%client_choice%"=="7" set "targetDir=%c7%"
 if not defined targetDir set "targetDir=%c1%"
 set "multiPath='%targetDir%'"
 goto mode_select
@@ -85,8 +88,8 @@ set "m_f=1"
 goto mode_select
 
 :all_clients_mode
-set "multiPath='%c1%','%c2%','%c3%','%c4%','%c5%','%c6%'"
-set "targetDir=ВСЕ КЛИЕНТЫ (1-6)"
+set "multiPath='%c1%','%c2%','%c3%','%c4%','%c5%','%c6%','%c7%'"
+set "targetDir=ВСЕ КЛИЕНТЫ (1-7)"
 goto mode_select
 
 :mode_select
