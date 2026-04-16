@@ -1,16 +1,18 @@
-# Принудительная кодировка UTF8 для работы с кириллицей
+# 1. Фикс кодировки (чтобы лого не ломалось)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# 1. Самовозвышение до админа
+# 2. Умная проверка админа для IEX
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $p = $PSCommandPath
-    if (!$p) { $p = "$env:TEMP\c.ps1" } # Если запущен из памяти, берем путь из темпа
-    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$p`"" -Verb RunAs
+    Write-Host "[!] Запрашиваю права администратора..." -ForegroundColor Yellow
+    # Перезапуск: скачивает заново и запускает уже от админа
+    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"iex (iwr -useb ://githubusercontent.com).Content`"" -Verb RunAs
     exit
 }
 
+# --- ДАЛЕЕ ВЕСЬ ТВОЙ КОД ОЧИСТКИ ---
 $titleName = "CLEANER - made by Pomidorckin"
 $host.UI.RawUI.WindowTitle = $titleName
+# ... (остальной код, который я кидал выше)
 
 # Настройка окна
 $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(115, 48)
